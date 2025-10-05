@@ -1,0 +1,142 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -656,
+        -96
+      ],
+      "id": "3a0608e3-60b7-4d33-a433-8c7e85ee25a5",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1ooyoVBDvXWdOsHn0wl5-UBOMfOWJw3JqOSLhO0SLOWU/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 771918277,
+          "mode": "list",
+          "cachedResultName": "การตอบแบบฟอร์ม 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ooyoVBDvXWdOsHn0wl5-UBOMfOWJw3JqOSLhO0SLOWU/edit#gid=771918277"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -448,
+        -96
+      ],
+      "id": "cfcabaa0-b07f-40ec-bb96-31727f077951",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vz4JnCVqvhkYhp7f",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// ดึงข้อมูลจาก Google Sheets\nconst rows = $input.all().map(item => item.json);\n\n// รวมยอดตามคอลัมน์ (แก้ชื่อคอลัมน์ให้ตรงกับชีตจริง)\nconst totalRevenue = rows.reduce((sum, row) => sum + Number(row[\"รวมยอด (บาท)\"] || 0), 0);\nconst totalQuantity = rows.reduce((sum, row) => sum + Number(row[\"จำนวน (ชิ้น)\"] || 0), 0);\n\n// ทำข้อความรายงานสรุป\nconst report = \n`📊 รายงานสรุปยอดขายวันนี้\n💰 รายได้รวม: ${totalRevenue.toLocaleString()} บาท\n📦 จำนวนสินค้าขายทั้งหมด: ${totalQuantity.toLocaleString()} ชิ้น`;\n\n// ส่งออกเป็น 1 item เท่านั้น\nreturn [\n  {\n    json: {\n      message: report\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -240,
+        -96
+      ],
+      "id": "28350e1d-ce8f-4ad1-bba8-b2d2a3f0def0",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "66010915512@msu.ac.th",
+        "subject": "Report_ประจำวัน",
+        "message": "={{ $json[\"message\"] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -16,
+        -96
+      ],
+      "id": "680be468-e9ea-4d31-9ff0-a3777ee5cb03",
+      "name": "Send a message",
+      "webhookId": "0cb08c27-490d-45a8-9696-936bd5492bc7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "K5O8HSHeivEY44ll",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4a39b745-240a-4d83-bc79-567fcd31efd0",
+  "meta": {
+    "instanceId": "5e563a81a900bea14d995ac4787cdacd5a6c614970425574802d25da5d6b17d3"
+  },
+  "id": "y2rvNtXwB7KSfpug",
+  "tags": []
+}
